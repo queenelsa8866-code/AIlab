@@ -4,8 +4,1042 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI Lab 情报洞察 Agent PRD v1.0</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --panel: rgba(255, 252, 246, 0.92);
+      --panel-strong: #fffdf8;
+      --ink: #1f1a17;
+      --muted: #6b625d;
+      --line: rgba(74, 59, 48, 0.14);
+      --accent: #8a4b2a;
+      --accent-soft: rgba(138, 75, 42, 0.12);
+      --success: #285d4c;
+      --warn: #9b6a1c;
+      --shadow: 0 18px 50px rgba(56, 39, 30, 0.08);
+      --radius: 20px;
+      --mono: "SFMono-Regular", "Menlo", "Consolas", monospace;
+      --serif: "Iowan Old Style", "Source Han Serif SC", "Noto Serif SC", "Songti SC", serif;
+      --sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at top left, rgba(138, 75, 42, 0.09), transparent 32%),
+        radial-gradient(circle at right center, rgba(40, 93, 76, 0.08), transparent 28%),
+        var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+      line-height: 1.7;
+    }
+
+    .layout {
+      width: min(1440px, calc(100vw - 48px));
+      margin: 32px auto 64px;
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    .toc {
+      position: sticky;
+      top: 20px;
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .toc h1 {
+      margin: 0 0 8px;
+      font-family: var(--serif);
+      font-size: 28px;
+      line-height: 1.2;
+    }
+
+    .toc .meta {
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .toc .version {
+      margin-bottom: 18px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel-strong);
+    }
+
+    .toc label,
+    .toc select {
+      display: block;
+      width: 100%;
+      font-size: 13px;
+    }
+
+    .toc label {
+      margin-bottom: 6px;
+      color: var(--muted);
+    }
+
+    .toc select {
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+    }
+
+    .toc nav a {
+      display: block;
+      padding: 8px 0;
+      color: var(--ink);
+      text-decoration: none;
+      border-bottom: 1px dashed rgba(74, 59, 48, 0.08);
+      font-size: 14px;
+    }
+
+    .toc nav a:last-child {
+      border-bottom: none;
+    }
+
+    .toc .callout {
+      margin-top: 18px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(138, 75, 42, 0.12), rgba(138, 75, 42, 0.04));
+      color: #57311c;
+      font-size: 13px;
+    }
+
+    .content {
+      display: grid;
+      gap: 20px;
+    }
+
+    .hero,
+    .section {
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+    }
+
+    .hero {
+      padding: 34px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -40px;
+      top: -40px;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(138, 75, 42, 0.16), transparent 68%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(31, 26, 23, 0.06);
+      color: var(--muted);
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .hero h2 {
+      margin: 18px 0 10px;
+      font-family: var(--serif);
+      font-size: clamp(30px, 3.6vw, 42px);
+      line-height: 1.12;
+      max-width: 900px;
+    }
+
+    .hero p {
+      max-width: 860px;
+      margin: 0;
+      font-size: 16px;
+      color: #403630;
+    }
+
+    .hero-grid {
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .hero-card {
+      padding: 18px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.66);
+      border: 1px solid rgba(74, 59, 48, 0.08);
+    }
+
+    .hero-card strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .hero-card span {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .section {
+      padding: 30px 32px;
+    }
+
+    .section h2 {
+      margin: 0 0 16px;
+      font-family: var(--serif);
+      font-size: 30px;
+      line-height: 1.2;
+    }
+
+    .section h3 {
+      margin: 26px 0 10px;
+      font-size: 19px;
+      line-height: 1.35;
+    }
+
+    .section p,
+    .section li {
+      color: #3d332d;
+      font-size: 15px;
+    }
+
+    .section ul {
+      margin: 10px 0 0;
+      padding-left: 20px;
+    }
+
+    .section code {
+      font-family: var(--mono);
+      font-size: 0.92em;
+      background: rgba(31, 26, 23, 0.06);
+      border-radius: 6px;
+      padding: 2px 6px;
+    }
+
+    .grid-2,
+    .grid-3 {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .card {
+      padding: 18px 18px 16px;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: var(--panel-strong);
+    }
+
+    .card h4 {
+      margin: 0 0 8px;
+      font-size: 16px;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: #6d371b;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .status.warn {
+      color: #6d4812;
+      background: rgba(155, 106, 28, 0.12);
+    }
+
+    .status.ok {
+      color: #1f5142;
+      background: rgba(40, 93, 76, 0.12);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: var(--panel-strong);
+    }
+
+    th,
+    td {
+      padding: 14px 14px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      background: rgba(31, 26, 23, 0.04);
+      color: #4c413a;
+      font-weight: 700;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .flow {
+      padding: 20px;
+      border: 1px dashed rgba(74, 59, 48, 0.22);
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.46));
+      font-family: var(--mono);
+      white-space: pre-wrap;
+      color: #4d4038;
+      font-size: 13px;
+    }
+
+    .pending {
+      margin-top: 16px;
+      padding: 18px 20px;
+      border-radius: 18px;
+      border: 1px solid rgba(155, 106, 28, 0.22);
+      background: rgba(155, 106, 28, 0.08);
+    }
+
+    .footer-note {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 1180px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .toc {
+        position: static;
+      }
+
+      .hero-grid,
+      .grid-3 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .layout {
+        width: min(100vw - 24px, 1440px);
+        margin: 12px auto 40px;
+      }
+
+      .hero,
+      .section,
+      .toc {
+        padding: 20px;
+      }
+
+      .hero-grid,
+      .grid-2,
+      .grid-3 {
+        grid-template-columns: 1fr;
+      }
+
+      .section h2 {
+        font-size: 24px;
+      }
+    }
+  </style>
 </head>
 <body>
-  <p>Uploaded from local workspace. If you want, I can publish the full styled HTML in a follow-up update.</p>
+  <div class="layout">
+    <aside class="toc">
+      <h1>AI Lab 情报洞察 Agent</h1>
+      <p class="meta">正式 PRD 页面 · v1.0 初版 · 面向 AI Lab 内部评审</p>
+      <div class="version">
+        <label for="version-select">版本切换</label>
+        <select id="version-select" aria-label="版本切换">
+          <option selected>v1.0 初版</option>
+        </select>
+      </div>
+      <nav>
+        <a href="#info">项目信息与版本记录</a>
+        <a href="#background">一、需求背景</a>
+        <a href="#goals">二、需求目标</a>
+        <a href="#whitelist">三、一期白名单</a>
+        <a href="#users">四、用户与使用场景</a>
+        <a href="#features">五、需求功能清单</a>
+        <a href="#solution">六、详细方案</a>
+        <a href="#flowchart">七、业务主流程</a>
+        <a href="#boundary">八、V1.0 范围</a>
+        <a href="#pending">九、待原型确认项</a>
+      </nav>
+      <div class="callout">
+        V1.0 重点是先跑通从白名单采集到洞察生成的主链路，并让内部快速看到：<strong>这一周发现了哪些高价值机会</strong>。
+      </div>
+    </aside>
+
+    <main class="content">
+      <section class="hero">
+        <span class="eyebrow">版本: v1.0评审稿</span>
+        <h2>AI Lab 信息搜集与需求洞察 Agent PRD v1.0</h2>
+        <p>
+          该产品用于帮助 AI Lab 持续采集外部高价值信息，通过标准化筛选与洞察卡生成，将分散资讯沉淀为可评审、可讨论、可分派下一步动作的高价值机会。
+          V1.0 围绕 <code>信息采集 -> AI 筛选 -> 洞察 -> 机会策略</code> 主线展开，重点交付稳定白名单采集、统一评分、洞察卡生成、机会策略入口和新增信息源入口。
+        </p>
+        <div class="hero-grid">
+          <div class="hero-card">
+            <strong>主评审问题</strong>
+            <span>本周最值得评审的机会是什么</span>
+          </div>
+          <div class="hero-card">
+            <strong>一期信源</strong>
+            <span>28 个白名单源</span>
+          </div>
+          <div class="hero-card">
+            <strong>筛选维度</strong>
+            <span>4 个统一评分口径</span>
+          </div>
+          <div class="hero-card">
+            <strong>人工介入</strong>
+            <span>仅新增信源审核</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="info">
+        <h2>项目信息与版本记录</h2>
+        <table>
+          <tr>
+            <th>字段</th>
+            <th>内容</th>
+          </tr>
+          <tr>
+            <td>项目名称</td>
+            <td>AI Lab 情报洞察 Agent</td>
+          </tr>
+          <tr>
+            <td>文档定位</td>
+            <td>正式 HTML PRD 页面，用于 AI Lab 内部评审与后续原型设计前的方向确认</td>
+          </tr>
+          <tr>
+            <td>项目目录</td>
+            <td><code>AI_Lab_情报洞察Agent_PRD_HTML_v1</code>，独立新建，不覆盖现有项目</td>
+          </tr>
+          <tr>
+            <td>当前版本</td>
+            <td>v1.0 初版</td>
+          </tr>
+          <tr>
+            <td>核心主线</td>
+            <td><code>信息采集 -> AI 筛选 -> 洞察 -> 机会策略</code></td>
+          </tr>
+          <tr>
+            <td>目标用户</td>
+            <td>AI Lab 负责人、AI Lab 成员、产品经理、设计人员、前端人员、后端人员</td>
+          </tr>
+          <tr>
+            <td>一期输入依据</td>
+            <td>原始 PRD 草稿 + 一期推荐白名单 + 本轮需求澄清</td>
+          </tr>
+        </table>
+
+        <h3>版本记录</h3>
+        <table>
+          <tr>
+            <th>版本</th>
+            <th>日期</th>
+            <th>变更说明</th>
+            <th>状态</th>
+          </tr>
+          <tr>
+            <td>v1.0</td>
+            <td>2026-05-18</td>
+            <td>完成正式 PRD 页面第一版，收敛 V1.0 主线、信源范围、筛选口径、洞察结构、首页侧边栏入口及首版交付范围</td>
+            <td><span class="status warn">待内部确认</span></td>
+          </tr>
+        </table>
+      </section>
+
+      <section class="section" id="background">
+        <h2>一、需求背景</h2>
+        <div class="grid-3">
+          <div class="card">
+            <h4>现状问题一：信息分散</h4>
+            <p>团队需要持续追踪 AI 产品、竞品动态、研究趋势和业务场景案例，但来源分散在 RSS、官网、媒体、GitHub、社区内容和内部材料中，难以形成统一池。</p>
+          </div>
+          <div class="card">
+            <h4>现状问题二：信息不等于机会</h4>
+            <p>当前更多停留在“知道了一条资讯”，但很少进一步结构化为“为什么重要”“适合哪个业务场景”“下一步谁来做什么”。</p>
+          </div>
+          <div class="card">
+            <h4>现状问题三：评审难聚焦</h4>
+            <p>内部评审真正关心的是一周内出现了哪些高价值机会，而不是一长串低密度资讯列表。</p>
+          </div>
+        </div>
+
+        <h3>为什么现在做</h3>
+        <p>
+          当前已经具备一期推荐白名单，可先用 28 个较高质量信源跑通最小闭环。产品价值不在于做一个更大的资讯站，而在于用统一规则把外部变化转换为结构化洞察和内部行动建议，降低 AI Lab 的预研与判断成本。
+        </p>
+
+        <h3>核心判断</h3>
+        <div class="flow">外部信息
+  -> 标准化采集
+  -> 去重与摘要
+  -> 按统一维度筛选打分
+  -> 生成洞察卡
+  -> 汇总本周高价值机会
+  -> 形成建议动作与责任归属</div>
+      </section>
+
+      <section class="section" id="goals">
+        <h2>二、需求目标</h2>
+        <table>
+          <tr>
+            <th>目标类型</th>
+            <th>描述</th>
+            <th>衡量指标</th>
+            <th>目标值</th>
+          </tr>
+          <tr>
+            <td>信息效率</td>
+            <td>降低人工分散检索与初筛成本，让团队更快看到值得看的内容</td>
+            <td>单次整理耗时</td>
+            <td>下降 50%</td>
+          </tr>
+          <tr>
+            <td>判断质量</td>
+            <td>统一使用相关性、新颖度、可落地性、影响范围 4 个维度筛选信息</td>
+            <td>高价值内容占比</td>
+            <td>≥ 60%</td>
+          </tr>
+          <tr>
+            <td>洞察沉淀</td>
+            <td>每条高价值信息都应输出结构化洞察，而不是只留链接</td>
+            <td>每周新增有效洞察</td>
+            <td>≥ 10 条</td>
+          </tr>
+          <tr>
+            <td>机会发现</td>
+            <td>聚焦本周值得内部继续判断或推进的高价值机会</td>
+            <td>每周新增高价值机会</td>
+            <td>≥ 3 条</td>
+          </tr>
+          <tr>
+            <td>评审效率</td>
+            <td>减少内部周会手工汇总成本，让评审直接围绕机会展开</td>
+            <td>周会整理耗时</td>
+            <td>下降 60%</td>
+          </tr>
+        </table>
+
+        <div class="tag-row">
+          <span class="tag">与 UU 业务相关性</span>
+          <span class="tag">新颖度</span>
+          <span class="tag">可落地性</span>
+          <span class="tag">影响范围</span>
+        </div>
+      </section>
+
+      <section class="section" id="whitelist">
+        <h2>三、一期白名单</h2>
+
+        <div class="grid-3">
+          <div class="card">
+            <h4>信源范围</h4>
+            <p>V1.0 先以 28 个推荐白名单源作为稳定输入池，覆盖产品洞察、行业媒体、官方动态、开源发布、开发者工作流与研究分析。</p>
+          </div>
+          <div class="card">
+            <h4>接入节奏</h4>
+            <p>按 P0、P1、P2 三档推进。优先接入低难度且对需求洞察直接有用的源，先跑通采集、去重、摘要和洞察链路。</p>
+          </div>
+          <div class="card">
+            <h4>评审价值</h4>
+            <p>白名单公开展示后，评审能直接判断 V1.0 的信息输入边界是否合理，避免后续对“看哪些信息”产生理解偏差。</p>
+          </div>
+        </div>
+
+        <h3>白名单总览</h3>
+        <table>
+          <tr>
+            <th>指标</th>
+            <th>内容</th>
+          </tr>
+          <tr>
+            <td>总信源数</td>
+            <td>28 个</td>
+          </tr>
+          <tr>
+            <td>P0</td>
+            <td>12 个，优先跑通稳定抓取、正文抽取、去重、摘要和洞察链路</td>
+          </tr>
+          <tr>
+            <td>P1</td>
+            <td>10 个，在主链路稳定后补充行业广度与竞品覆盖</td>
+          </tr>
+          <tr>
+            <td>P2</td>
+            <td>6 个，补高价值但解析或维护成本更高的深度源</td>
+          </tr>
+        </table>
+
+        <h3>一期白名单明细</h3>
+        <table>
+          <tr>
+            <th>分类</th>
+            <th>信源</th>
+            <th>抓取难度</th>
+            <th>优先级</th>
+            <th>建议抓取方式</th>
+            <th>纳入原因</th>
+          </tr>
+          <tr><td rowspan="6">产品与用户洞察</td><td>人人都是产品经理</td><td>低</td><td>P0</td><td>RSS</td><td>中文产品方法与案例密度高，适合提炼需求场景与产品问题</td></tr>
+          <tr><td>少数派</td><td>低</td><td>P0</td><td>RSS</td><td>用户工作流、工具使用习惯、效率场景质量高</td></tr>
+          <tr><td>爱范儿</td><td>低</td><td>P1</td><td>RSS</td><td>AI 产品与消费科技结合紧，适合看产品落地方式</td></tr>
+          <tr><td>虎嗅</td><td>中</td><td>P1</td><td>RSS + 正文抓取</td><td>商业趋势与行业动作覆盖广，可补充市场语境</td></tr>
+          <tr><td>知乎</td><td>中</td><td>P2</td><td>RSS + 轻量正文抓取</td><td>补充真实讨论、经验观点与用户问题表达</td></tr>
+          <tr><td>Product Hunt</td><td>中</td><td>P0</td><td>RSS</td><td>新产品首发密集，适合发现新品类和交互趋势</td></tr>
+          <tr><td rowspan="3">创业与生态</td><td>Y Combinator Blog</td><td>低</td><td>P1</td><td>RSS</td><td>创业公司方法论与产品化判断质量高</td></tr>
+          <tr><td>AI + a16z</td><td>高</td><td>P2</td><td>页面抓取</td><td>AI 创业、平台、商业化观察有连续性</td></tr>
+          <tr><td>Sequoia Stories</td><td>高</td><td>P2</td><td>页面抓取</td><td>偏公司建设、市场判断和长期趋势</td></tr>
+          <tr><td rowspan="2">行业媒体</td><td>The Decoder: AI News</td><td>低</td><td>P0</td><td>RSS</td><td>海外 AI 行业信息密度高，比泛科技媒体更聚焦</td></tr>
+          <tr><td>IT之家</td><td>中</td><td>P1</td><td>RSS + 正文抓取</td><td>保留一个中文泛科技媒体补充国内动态即可</td></tr>
+          <tr><td rowspan="5">官方动态</td><td>OpenAI 官网动态</td><td>低</td><td>P0</td><td>RSS</td><td>核心模型、产品和生态动作的一手来源</td></tr>
+          <tr><td>Anthropic Newsroom</td><td>低</td><td>P0</td><td>页面抓取</td><td>官方产品、合作与组织动作一手来源</td></tr>
+          <tr><td>Google Developers Blog</td><td>低</td><td>P0</td><td>RSS</td><td>Google 生态内 AI 开发能力更新稳定</td></tr>
+          <tr><td>xAI News</td><td>低</td><td>P1</td><td>页面抓取</td><td>新模型、新产品和生态动作的一手来源</td></tr>
+          <tr><td>Runway News</td><td>中</td><td>P1</td><td>页面抓取</td><td>视频生成和创意工具方向的重要竞品信号</td></tr>
+          <tr><td rowspan="2">官方研究</td><td>Anthropic Research</td><td>高</td><td>P2</td><td>页面抓取</td><td>研究方向与安全、能力判断价值高</td></tr>
+          <tr><td>Apple Machine Learning Research</td><td>中</td><td>P1</td><td>RSS</td><td>偏终端 AI、模型工程与研究落地</td></tr>
+          <tr><td rowspan="6">开源与发布</td><td>GitHub OpenAI Releases</td><td>低</td><td>P0</td><td>GitHub Releases 页面抓取</td><td>能直接监控 OpenAI 开发者生态的版本变化</td></tr>
+          <tr><td>GitHub LangChain Releases</td><td>低</td><td>P0</td><td>GitHub Releases 页面抓取</td><td>Agent 编排生态变化快，需持续跟踪</td></tr>
+          <tr><td>Claude Code GitHub Releases</td><td>低</td><td>P0</td><td>GitHub Releases / RSS</td><td>代码 Agent 工具链的重要更新面</td></tr>
+          <tr><td>Hugging Face Blog</td><td>中</td><td>P1</td><td>RSS</td><td>模型、工具、社区实践更新密集</td></tr>
+          <tr><td>HuggingFace Daily Papers</td><td>中</td><td>P2</td><td>页面抓取</td><td>适合快速发现社区高讨论度论文</td></tr>
+          <tr><td>GitHub Blog</td><td>低</td><td>P0</td><td>RSS / 页面抓取</td><td>开发者平台、Copilot 与工作流变化值得看</td></tr>
+          <tr><td rowspan="2">开源与开发者工作流</td><td>Cursor Blog</td><td>中</td><td>P1</td><td>页面抓取</td><td>编码工作流变化直接影响 AI 产品体验基线</td></tr>
+          <tr><td>Simon Willison 博客</td><td>低</td><td>P0</td><td>RSS / 页面抓取</td><td>工具、LLM 应用、开发实践的高质量个人源</td></tr>
+          <tr><td rowspan="2">研究与分析</td><td>Nathan Lambert: Interconnects</td><td>低</td><td>P0</td><td>RSS</td><td>开源模型、研究与行业分析质量高</td></tr>
+          <tr><td>CMU Machine Learning Blog</td><td>低</td><td>P1</td><td>RSS / 页面抓取</td><td>研究成果更容易转成方法与趋势判断</td></tr>
+        </table>
+      </section>
+
+      <section class="section" id="users">
+        <h2>四、用户与使用场景</h2>
+
+        <h3>典型用户</h3>
+        <table>
+          <tr>
+            <th>角色</th>
+            <th>核心诉求</th>
+          </tr>
+          <tr>
+            <td>AI Lab 成员</td>
+            <td>快速看到本周最值得关注的外部变化，并直接得到洞察与下一步建议</td>
+          </tr>
+          <tr>
+            <td>AI Lab 负责人</td>
+            <td>判断哪些机会值得投入时间继续预研或进入项目讨论</td>
+          </tr>
+          <tr>
+            <td>产品经理</td>
+            <td>把外部案例映射到业务场景，判断是否值得进入需求预研与方案讨论</td>
+          </tr>
+          <tr>
+            <td>设计人员</td>
+            <td>关注 AI 产品形态、交互方式和界面趋势，辅助判断体验方向与设计机会</td>
+          </tr>
+          <tr>
+            <td>前端人员</td>
+            <td>评估产品形态、前端实现复杂度和交互方案是否适合快速验证</td>
+          </tr>
+          <tr>
+            <td>后端人员</td>
+            <td>评估数据接入、处理链路和系统实现成本，辅助判断可落地性</td>
+          </tr>
+        </table>
+
+        <h3>核心使用场景</h3>
+        <table>
+          <tr>
+            <th>场景</th>
+            <th>用户行为</th>
+            <th>当前痛点</th>
+            <th>产品机会</th>
+          </tr>
+          <tr>
+            <td>日常快速捕捉信息</td>
+            <td>查看最近最值得关注的 3-5 条机会</td>
+            <td>原始资讯太散，无法快速收束</td>
+            <td>提供高价值机会摘要与责任建议</td>
+          </tr>
+          <tr>
+            <td>发现值得研究的新方向</td>
+            <td>从精选情报进入洞察详情</td>
+            <td>不知道一条资讯为何重要</td>
+            <td>输出“为什么重要”与“适用业务场景”</td>
+          </tr>
+          <tr>
+            <td>团队补充新信源</td>
+            <td>从侧边栏提交新增信息源</td>
+            <td>优质来源难统一沉淀</td>
+            <td>通过人工审核机制纳入白名单</td>
+          </tr>
+        </table>
+
+        <h3>用户旅程图</h3>
+        <table>
+          <tr>
+            <th>阶段</th>
+            <th>用户触点</th>
+            <th>用户行为</th>
+            <th>痛点/情绪</th>
+            <th>产品机会点</th>
+          </tr>
+          <tr>
+            <td>发现信息</td>
+            <td>首页精选情报</td>
+            <td>先扫一遍本日重点信息与推荐理由</td>
+            <td>担心信息太多、太杂、没有重点</td>
+            <td>用精选卡片和推荐理由先做收束</td>
+          </tr>
+          <tr>
+            <td>判断价值</td>
+            <td>信息详情 / 洞察详情</td>
+            <td>查看这条信息为什么重要、和 UU 有何关系</td>
+            <td>单看摘要仍难判断是否值得讨论</td>
+            <td>统一展示 4 维打分与业务映射</td>
+          </tr>
+          <tr>
+            <td>形成洞察</td>
+            <td>需求洞察模块</td>
+            <td>读取结构化洞察卡</td>
+            <td>外部案例无法直接转成内部动作</td>
+            <td>增加机会建议与建议动作字段</td>
+          </tr>
+          <tr>
+            <td>聚焦机会</td>
+            <td>首页侧边栏“机会策略”入口</td>
+            <td>集中查看当前最值得继续跟进的机会</td>
+            <td>想看重点，不想被长列表淹没</td>
+            <td>把高价值机会做成独立入口</td>
+          </tr>
+          <tr>
+            <td>扩充信源</td>
+            <td>首页侧边栏“新增信息源”入口</td>
+            <td>提交新来源并给出推荐理由</td>
+            <td>新来源是否可靠缺少机制</td>
+            <td>仅在新增信源环节加入人工审核</td>
+          </tr>
+        </table>
+      </section>
+
+      <section class="section" id="features">
+        <h2>五、需求功能清单</h2>
+        <table>
+          <tr>
+            <th>模块</th>
+            <th>功能点</th>
+            <th>优先级</th>
+            <th>基础逻辑说明</th>
+          </tr>
+          <tr>
+            <td>模块一 / 信息模块</td>
+            <td>精选</td>
+            <td>P0</td>
+            <td>从全部 AI 动态构成的信息池里，由 AI 二次筛选出高价值结果，作为用户优先查看入口</td>
+          </tr>
+          <tr>
+            <td>模块一 / 信息模块</td>
+            <td>全部 AI 动态</td>
+            <td>P0</td>
+            <td>承接白名单采集后的完整信息池，提供全量动态查看、筛选与检索能力</td>
+          </tr>
+          <tr>
+            <td>模块一 / 信息模块</td>
+            <td>AI 日报</td>
+            <td>P0</td>
+            <td>自动汇总当日重点信息与核心变化，方便用户快速浏览当天值得看的内容</td>
+          </tr>
+          <tr>
+            <td>模块一 / 信息模块</td>
+            <td>潜力爆文</td>
+            <td>P0</td>
+            <td>从信息池中识别具有高传播潜力或高讨论价值的内容，作为额外关注入口</td>
+          </tr>
+          <tr>
+            <td>模块一 / 信息模块</td>
+            <td>信源</td>
+            <td>P0</td>
+            <td>集中展示当前已接入的白名单信源，帮助用户理解信息来源范围与覆盖结构</td>
+          </tr>
+          <tr>
+            <td>模块一 / 信息模块</td>
+            <td>新增信源</td>
+            <td>P0</td>
+            <td>用户提交新的候选信源，填写链接、推荐理由、分类和提报人，进入人工审核后决定是否纳入</td>
+          </tr>
+          <tr>
+            <td>模块二 / 需求洞察</td>
+            <td>需求洞察</td>
+            <td>P0</td>
+            <td>按相关性、新颖度、可落地性、影响范围 4 个维度评估信息，并生成事实摘要、重要性、适用场景、机会建议、优先级、置信度和建议动作</td>
+          </tr>
+          <tr>
+            <td>模块三 / 支持模块</td>
+            <td>更新日志</td>
+            <td>P0</td>
+            <td>记录信源接入、规则调整、分析口径变化和功能更新，便于后续追踪版本变化</td>
+          </tr>
+          <tr>
+            <td>模块三 / 支持模块</td>
+            <td>反馈</td>
+            <td>P0</td>
+            <td>支持用户反馈结果是否准确、内容是否有帮助，以及需要补充的新方向或问题</td>
+          </tr>
+        </table>
+      </section>
+
+      <section class="section" id="solution">
+        <h2>六、详细方案</h2>
+
+        <h3>6.1 模块一 / 信息模块</h3>
+        <div class="grid-2">
+          <div class="card">
+            <h4>页面定位</h4>
+            <p>信息模块承接用户日常捕捉外部变化的主要入口。它不是单一列表，而是一组围绕“信息池、AI 二次筛选和辅助浏览”的信息产品结构。</p>
+          </div>
+          <div class="card">
+            <h4>信息结构</h4>
+            <p>该模块下包含 <strong>精选、全部 AI 动态、AI 日报、潜力爆文、信源、新增信源</strong> 六个入口。其中“精选”是 AI 从信息池中二次筛出的高价值结果，“全部 AI 动态”是底层信息池。</p>
+          </div>
+        </div>
+
+        <h4>信息模块功能说明</h4>
+        <table>
+          <tr>
+            <th>入口</th>
+            <th>说明</th>
+          </tr>
+          <tr>
+            <td>精选</td>
+            <td>展示 AI 从信息池中二次筛选后的高价值内容，优先满足“先看什么”的需求</td>
+          </tr>
+          <tr>
+            <td>全部 AI 动态</td>
+            <td>承接白名单采集后的全量信息池，用户可以在这里查看完整动态并回溯原始信息</td>
+          </tr>
+          <tr>
+            <td>AI 日报</td>
+            <td>自动汇总当天重点信息，适合快速浏览当日变化与重点趋势</td>
+          </tr>
+          <tr>
+            <td>潜力爆文</td>
+            <td>识别具有高传播潜力或高讨论价值的内容，帮助用户补充发现“值得多看一眼”的信息</td>
+          </tr>
+          <tr>
+            <td>信源</td>
+            <td>展示当前已纳入的信息来源，帮助用户理解系统覆盖边界与来源结构</td>
+          </tr>
+          <tr>
+            <td>新增信源</td>
+            <td>提交新的候选信息源，补充系统信息覆盖范围；该入口是信息模块里唯一带人工审核的能力</td>
+          </tr>
+        </table>
+
+        <h4>信息模块基础规则</h4>
+        <ul>
+          <li>数据来源仅限一期 28 个白名单信源。</li>
+          <li>“全部 AI 动态”是信息池，“精选”是从信息池中经过 AI 二次筛选后的结果。</li>
+          <li>新增信源需要人工审核，其余信息消费与洞察生成默认由系统直接完成。</li>
+        </ul>
+
+        <h3>6.2 模块二 / 需求洞察</h3>
+        <p>需求洞察是产品核心。系统不是简单总结原文，而是将信息转成一张可评审的判断卡片。</p>
+
+        <h4>洞察卡最小结构</h4>
+        <table>
+          <tr>
+            <th>字段</th>
+            <th>说明</th>
+          </tr>
+          <tr>
+            <td>事实摘要</td>
+            <td>客观概括发生了什么，避免过度加工</td>
+          </tr>
+          <tr>
+            <td>为什么重要</td>
+            <td>说明该变化为何值得 AI Lab 关注</td>
+          </tr>
+          <tr>
+            <td>适用业务场景</td>
+            <td>映射到 UU 具体业务或内部提效场景</td>
+          </tr>
+          <tr>
+            <td>机会建议</td>
+            <td>从产品/运营/设计/技术角度提出可讨论机会</td>
+          </tr>
+          <tr>
+            <td>优先级</td>
+            <td>用于初步收束，不等同于项目正式排期</td>
+          </tr>
+          <tr>
+            <td>置信度</td>
+            <td>表明系统对该判断的把握程度</td>
+          </tr>
+          <tr>
+            <td>建议动作</td>
+            <td>明确下一步谁该做什么，例如“产品本周补充业务映射”“设计补形态参考”“技术评估接入成本”</td>
+          </tr>
+        </table>
+
+        <h4>基础规则</h4>
+        <ul>
+          <li>所有洞察均按统一 4 维评分口径产出，避免不同人采用不同判断标准。</li>
+          <li>首版默认采用系统直出洞察，生成后直接进入结果沉淀。</li>
+          <li>洞察由信息模块承接输入，但在产品结构上作为独立第二模块存在。</li>
+        </ul>
+
+        <h3>6.3 模块三 / 更新日志与反馈</h3>
+        <p>第三模块不直接生产洞察结果，但承担系统可追踪、可修正、可持续优化的支持能力。</p>
+        <table>
+          <tr>
+            <th>入口</th>
+            <th>说明</th>
+          </tr>
+          <tr>
+            <td>更新日志</td>
+            <td>记录信源接入、规则变化、分析策略调整和版本更新，帮助用户理解系统最近发生了什么变化</td>
+          </tr>
+          <tr>
+            <td>反馈</td>
+            <td>支持用户反馈筛选结果是否准确、洞察是否有帮助，以及哪些方向需要持续补充或修正</td>
+          </tr>
+        </table>
+
+        <h3>6.4 数据流与职责分工</h3>
+        <div class="flow">白名单信源
+  -> 采集原文 / 链接 / 元信息
+  -> 去重与摘要
+  -> 全部 AI 动态（信息池）
+  -> AI 二次筛选
+  -> 精选 / AI 日报 / 潜力爆文
+  -> 生成需求洞察
+  -> 洞察结果沉淀
+
+新增信源提报
+  -> 人工审核
+  -> 纳入白名单
+  -> 下一轮采集生效
+
+更新日志 / 反馈
+  -> 记录变化
+  -> 回流优化筛选与洞察规则</div>
+      </section>
+
+      <section class="section" id="flowchart">
+        <h2>七、业务主流程</h2>
+        <div class="flow">flowchart TD
+    A["一期白名单信源采集"] --> B["去重与摘要"]
+    B --> C["统一评分: 相关性 / 新颖度 / 可落地性 / 影响范围"]
+    C --> D["生成洞察卡"]
+    D --> E["首页精选情报展示"]
+    D --> F["洞察结果沉淀"]
+    F --> G["机会策略入口汇总本周高价值机会"]
+    G --> H["给出建议动作与责任角色"]
+    I["新增信息源入口"] --> J["人工审核"]
+    J --> K["纳入白名单"]
+    K --> A</div>
+        <p class="footer-note">说明：正式 Mermaid 图与异常分支将在原型阶段结束后补充为可直接渲染版本。</p>
+      </section>
+
+      <section class="section" id="boundary">
+        <h2>八、V1.0 范围</h2>
+        <div class="grid-3">
+          <div class="card">
+            <h4>白名单信源驱动</h4>
+            <p>V1.0 以一期 28 个推荐白名单源为输入基础，优先保证采集、去重、摘要与洞察链路稳定可用。</p>
+          </div>
+          <div class="card">
+            <h4>统一评分与洞察沉淀</h4>
+            <p>V1.0 统一采用相关性、新颖度、可落地性、影响范围 4 个维度进行筛选，并输出结构化洞察卡。</p>
+          </div>
+          <div class="card">
+            <h4>双入口支撑评审</h4>
+            <p>V1.0 在首页右侧提供“机会策略”和“新增信息源”两个侧边栏入口，分别承接高价值机会评审与信源扩充。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="pending">
+        <h2>九、待原型确认项</h2>
+        <div class="pending">
+          <strong>以下内容将在高保真 HTML 原型阶段补充：</strong>
+          <ul>
+            <li>首页主体区与右侧边栏的最终布局比例、视觉层级和交互状态。</li>
+            <li>精选情报卡、洞察详情页、机会策略入口、新增信息源入口的页面结构。</li>
+            <li>异常状态，包括空数据、抓取失败、重复信息、低置信度结果展示方式。</li>
+            <li>可嵌入 PRD 的原型切片路径与对应模块说明。</li>
+            <li>正式 Mermaid 图、异常分支流程图和埋点建议。</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+  </div>
 </body>
 </html>
